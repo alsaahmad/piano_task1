@@ -26,16 +26,7 @@ const keymap = {
     "x": "key - x",
     "y": "key - y",
     "z": "key - z",
-    "1": "key - 1",
-    "2": "key - 2",
-    "3": "key - 3",
-    "4": "key - 4",
-    "5": "key - 5",
-    "6": "key - 6",
-    "7": "key - 7",
-    "8": "key - 8",
-    "9": "key - 9",
-    "0": "key - 0",
+    
 };
 const soundmap = {
     "a": "a.wav",
@@ -79,6 +70,16 @@ const soundmap = {
 document.addEventListener("keydown", function(event) {
     const key = event.key.toLowerCase();
     if (key in keymap) {
+
+      // record
+       if (isRecording) {
+            recording.push({
+                key: key,
+                time: Date.now() - recordStartTime
+            });
+        }
+
+        
         const keyElement = document.querySelector(`[data-key="${key}"]`);
 
         if (keyElement) {
@@ -104,28 +105,84 @@ document.addEventListener("keyup", function(event) {//keyup- stoped pressing
 );
 
 
-const totalkeys = 23; 
-const half = Math.floor(totalkeys / 2);
+const totalkeys = 24; // 2 octaves
 const piano = document.querySelector(".piano");
+
+// take 24 keys from your keymap
 const keylist = Object.keys(keymap).slice(0, totalkeys);
-const pattern = [
+
+// octave pattern (C → B)
+const octavePattern = [
   "white", "black",
   "white", "black",
-  "white","black",
-  "white", "black",
-  "white", "black",
-  "white", "black"
+  "white", "white",
+  "black", "white",
+  "black", "white",
+  "black", "white"
 ];
 
-for (let i = 0; i < totalkeys; i++) {//create each piano key
-    const k = keylist[i];
-    const div = document.createElement("div");//Create a new <div> (This is one piano key.)
+const whiteKeyWidth = 50;   // <-- ADD THIS
+let whiteIndex = 0;
 
-    // pick the correct class using the pattern
-    let divclassname = pattern[i % 12];
+for (let i = 0; i < totalkeys; i++) {
+    const key = keylist[i];
+    const div = document.createElement("div");
+    const type = octavePattern[i % 12];
 
-    div.className = divclassname + " " + keymap[k];//adds CSS classes to the div.
-    div.dataset.key = k; //connects piano to keyboard
-    div.textContent = k.toUpperCase();
-    piano.appendChild(div);//This finally puts the key inside your piano.
+    div.className = "key " + type;
+    div.dataset.key = key;
+    div.textContent = key.toUpperCase();
+
+    if (type === "white") {
+        div.style.position = "relative";
+        whiteIndex++;
+    } else {
+        // black key positioning
+        const leftPos = whiteIndex * whiteKeyWidth - 18;
+        div.style.left = leftPos + "px";
+        div.style.position = "absolute";
+    }
+
+    piano.appendChild(div);
 }
+//butons
+let isRecording = false;
+let recording = [];
+let recordStartTime = 0;
+
+document.getElementById("recordBtn").addEventListener("click", () => {
+    isRecording = true;
+    recording = [];
+    recordStartTime = Date.now();
+
+    document.getElementById("recordBtn").classList.add("recording");
+    document.getElementById("stopBtn").disabled = false;
+    document.getElementById("playBtn").disabled = true;
+});
+
+document.getElementById("stopBtn").addEventListener("click", () => {
+    isRecording = false;
+    document.getElementById("recordBtn").classList.remove("recording");
+
+    document.getElementById("stopBtn").disabled = true;
+    document.getElementById("playBtn").disabled = false;
+});
+
+document.getElementById("playBtn").addEventListener("click", () => {
+    let now = Date.now();
+
+    recording.forEach(event => {
+        setTimeout(() => {
+            const keyElement = document.querySelector(`[data-key="${event.key}"]`);
+            if (keyElement) {
+                keyElement.classList.add("active");
+                const audio = new Audio(`tunes/${soundmap[event.key]}`);
+                audio.play();
+                audio.addEventListener("ended", () => {
+                    keyElement.classList.remove("active");
+                });
+            }
+        }, event.time);
+    });
+});
+
