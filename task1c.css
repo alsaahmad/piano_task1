@@ -1,26 +1,33 @@
 body {
-  margin: 0;
+  margin: 100px;
   padding: 0;
   box-sizing: border-box;
   background-color:pink;
-  height: 100vh;
-  justify-content: center;
-  align-items: center;
-  display: flex;
   font-family: Arial, sans-serif;
+
+  display: flex;
+  flex-direction: column;   /* Stack buttons ABOVE piano */
+  justify-content: flex-start;  /* Start from top */
+  align-items: center;   /* Center horizontally */
+
+  height: 100vh;
 }
+
 .piano {
   display: flex;
   justify-content: center;
   align-items: flex-end;
-  gap: 6px;
+  gap: 0;
   padding: 20px;
   background:black;
   border-radius: 10px;
+   position: relative;     /* IMPORTANT */
+  height: 200px;
 }
 
 
 .key.white {
+  position: relative;
   width: 50px;
   height: 180px;
   background: #fff;
@@ -33,6 +40,7 @@ body {
   font-weight: bold;
   cursor: pointer;
   transition: 0.1s;
+  z-index: 1;
 }
 
 .key.white.active {
@@ -42,9 +50,11 @@ body {
 
 
 .key.black {
-  width: 50px;
-  height: 180px;
-  background: #484747;
+  position: absolute;
+  bottom: 82px;
+  width: 35px;
+  height: 120px;
+  background: #333;
   color: #fff;
   border-radius: 6px;
   display: flex;
@@ -54,9 +64,40 @@ body {
   font-weight: bold;
   cursor: pointer;
   transition: 0.1s;
+  z-index: 10;
+  margin-left: 35px;
 }
+
 
 .key.black.active {
   background: #333;
-  transform: translateY(-15px);
+  transform: translateY(-5px);
+}
+/* buttons */
+.controls {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+#recordBtn, #stopBtn, #playBtn {
+  padding: 10px 25px;
+  font-size: 18px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  background: white;
+  font-weight: bold;
+}
+
+#recordBtn.recording {
+  background: red;
+  color: white;
+  animation: blink 0.8s infinite;
+}
+
+@keyframes blink {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0.2; }
 }
